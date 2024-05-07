@@ -4,28 +4,24 @@
     <v-container>
       <h2>Your Favorite Radios</h2><br>
       <v-row>
-        <v-col cols="12" sm="6" md="4" lg="3" v-for="radio in favoriteRadios" :key="radio.id">
-          <v-card class="d-flex flex-row card" flat tile @mouseenter="showControls(radio)"
-            @mouseleave="hideControls(radio)">
-            <v-img :src="radio.favicon || defaultImage" class="card-image" :alt="radio.name" />
-            <v-card-title class="flex-grow-1">{{ radio.name }}</v-card-title>
-            <div v-if="radio.showControls" class="controls">
-              <v-btn @click="togglePlayPause(radio)" :color="radio.playing ? 'error' : 'primary'" small>
-                {{ radio.playing ? 'Pause' : 'Play' }}
-              </v-btn>
-              <div @click="toggleFavorite(radio)" class="heart-container">
-                <div :class="['heart', { 'liked': radio.favorite }]"></div>
-              </div>
-              <div v-if="radio.playing" class="sound-wave">
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-                <div class="bar"></div>
-              </div>
+      <v-col cols="12" sm="6" md="4" lg="3" v-for="radio in favoriteRadios" :key="radio.id">
+        <v-card class="d-flex flex-row card" flat tile @mouseenter="mostraComandi(radio)"
+          @mouseleave="nascondiComandi(radio)">
+          <v-img :src="radio.favicon || defaultImage" class="card-image" :alt="radio.name" />
+          <v-card-title class="flex-grow-1">{{ radio.name }}</v-card-title>
+          <div v-if="radio.mostraComandi" class="controls">
+          <v-btn @click="cambiaRiproduzione(radio)" class="ms-2"  variant="text" size="small">
+            <v-icon>
+              <v-icon>{{ icon }}</v-icon>
+            </v-icon>
+          </v-btn>
+            <div @click="cambiaPreferito(radio)" class="heart-container">
+              <div :class="['heart', { 'liked': radio.favorite }]"></div>
             </div>
-          </v-card>
-        </v-col>
-      </v-row>
+          </div>
+        </v-card>
+      </v-col>
+    </v-row>
     </v-container>
   </div>
 </template>
@@ -38,41 +34,34 @@ export default {
   name: 'FavoriteRadios',
   data() {
     return {
+      icon: "mdi-play",
       favoriteRadios: [],
       defaultImage,
     }
   },
   methods: {
     async fetchRadios() {
-      const response = await fetch('https://nl1.api.radio-browser.info/json/stations/search?limit=100&countrycode=IT&hidebroken=true&order=clickcount&reverse=true');
-      const data = await response.json();
-      const allRadios = data.filter(radio => radio.countrycode === 'IT').map(radio => ({
-        ...radio,
-        favorite: true, // Set favorite to true by default
-        showControls: false,
-        playing: false,
-        audioPlayer: new Audio(),
-      }));
-      const favorites = JSON.parse(localStorage.getItem('favorites')) || [];
-      const favoriteRadios = allRadios.filter(radio => favorites.some(fav => fav.changeuuid === radio.changeuuid && fav.favorite));
-      return favoriteRadios;
+      let favorites = JSON.parse( localStorage.getItem('favorites'));
+      console.log(JSON.parse( localStorage.getItem('favorites')))
+      console.log(favorites);
+      return favorites;
     },
-    async getFavoriteRadios() {
+    async favourites() {
       try {
         this.favoriteRadios = await this.fetchRadios();
       } catch (error) {
         console.error('Error fetching favorite radios:', error);
       }
     },
-    togglePlayPause(radio) {
+    cambiaRiproduzione(radio) {
       if (radio.playing) {
-        this.pauseRadio(radio);
+        this.fermaradio(radio);
       } else {
-        this.pauseAllRadios(); // Pause all other radios
-        this.playRadio(radio);
+        this.fermatutte(); // Pause all other radios
+        this.play(radio);
       }
     },
-    playRadio(radio) {
+    play(radio) {
       const audioUrl = radio.url_resolved || radio.url;
       if (audioUrl.includes('m3u8')) {
         if (Hls.isSupported()) {
@@ -94,38 +83,38 @@ export default {
         });
       radio.playing = true;
     },
-    pauseRadio(radio) {
+    fermaradio(radio) {
       radio.audioPlayer.pause();
       radio.playing = false;
     },
-    pauseAllRadios() {
+    fermatutte() {
       this.favoriteRadios.forEach(radio => {
         if (radio.playing) {
-          this.pauseRadio(radio);
+          this.fermaradio(radio);
         }
       });
     },
-    toggleFavorite(radio) {
+    cambiaPreferito(radio) {
       radio.favorite = !radio.favorite;
       if (!radio.favorite) {
-        this.removeFavorite(radio);
+        this.rimuoviPreferito(radio);
       }
     },
-    removeFavorite(radio) {
+    rimuoviPreferito(radio) {
       let favorites = JSON.parse(localStorage.getItem('favorites')) || [];
       favorites = favorites.filter(fav => fav.changeuuid !== radio.changeuuid);
       localStorage.setItem('favorites', JSON.stringify(favorites));
-      this.getFavoriteRadios(); // Refresh favorite radios list after removing favorite
+      this.favourites(); // Refresh favorite radios list after removing favorite
     },
-    showControls(radio) {
-      radio.showControls = true;
+    mostraComandi(radio) {
+      radio.mostraComandi = true;
     },
-    hideControls(radio) {
-      radio.showControls = false;
+    nascondiComandi(radio) {
+      radio.mostraComandi = false;
     },
   },
   created() {
-    this.getFavoriteRadios();
+    this.favourites();
   },
 }
 </script>

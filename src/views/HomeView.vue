@@ -8,9 +8,11 @@
           <v-img :src="radio.favicon || defaultImage" class="card-image" :alt="radio.name" />
           <v-card-title class="flex-grow-1">{{ radio.name }}</v-card-title>
           <div v-if="radio.showControls" class="controls">
-            <v-btn class="bnt-play" @click="cambiaRiproduzione(radio)" :color="radio.playing ? 'error' : 'primary'" small>
-              {{ radio.playing ? '■' : '‣' }}
-            </v-btn>
+          <v-btn @click="cambiaRiproduzione(radio)" class="ms-2"  variant="text" size="small">
+            <v-icon>
+              <v-icon>{{ icon }}</v-icon>
+            </v-icon>
+          </v-btn>
             <div @click="cambiaPreferito(radio)" class="heart-container">
               <div :class="['heart', { 'liked': radio.favorite }]"></div>
             </div>
@@ -24,13 +26,18 @@
 <script>
 import Hls from 'hls.js';
 import defaultImage from '../assets/no-image.png';
+import playImage from '../assets/play.jpg';
+import stopImage from '../assets/stop.png';
 
 export default {
   name: 'PaginaPrincipale',
   data() {
     return {
+      icon: "mdi-play",
       radios: [],
       defaultImage,
+      playImage,
+      stopImage,
     }
   },
   methods: {
@@ -66,7 +73,9 @@ export default {
     cambiaRiproduzione(radio) {
       if (radio.playing) {
         this.fermaSingola(radio);
+        this.icon = "mdi-play";
       } else {
+        this.icon = "mdi-stop";
         this.interrompiTutto(); // Interrompi tutte le altre radio
         const audioUrl = radio.url_resolved || radio.url;
       if (audioUrl.includes('m3u8')) {
@@ -107,16 +116,18 @@ export default {
       radio.favorite = !radio.favorite;
       if (!radio.favorite) {
         let preferenze = JSON.parse(localStorage.getItem('preferenze')) || [];
-      preferenze = preferenze.filter(fav => fav.changeuuid !== radio.changeuuid);
-      localStorage.setItem('preferenze', JSON.stringify(preferenze));
+        preferenze = this.radios.filter(radio => radio.favorite)
+        console.log(JSON.stringify(preferenze));
+        localStorage.setItem('preferenze', JSON.stringify(preferenze));
       } else {
         this.salvaPreferito();
       }
     },
     salvaPreferito() {
-      const preferenze = this.radios.map(radio => ({ changeuuid: radio.changeuuid, favorite: radio.favorite }));
-      localStorage.setItem('preferenze', JSON.stringify(preferenze));
-      console.log(JSON.stringify(preferenze));
+      let preferenze = JSON.parse(localStorage.getItem('preferenze')) || [];
+        preferenze = this.radios.filter(radio => radio.favorite)
+        localStorage.setItem('preferenze', JSON.stringify(preferenze));
+        console.log(localStorage.getItem('preferenze'));
     },
   },
   created() {
@@ -140,6 +151,11 @@ export default {
   padding: 20px;
 }
 
+.image{
+  width: 50px;
+  height:50px;
+}
+
 .heart-container {
   display: inline-block;
   cursor: pointer;
@@ -160,8 +176,9 @@ export default {
 }
 
 .bnt-play{
+  background-color: Green;
   font-size: 40px;
-  font-al
+  padding-bottom: 40px;
   margin-left: -40px;
   width: 100px;
 }
