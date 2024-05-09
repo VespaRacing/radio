@@ -12,7 +12,7 @@
           <v-spacer></v-spacer>
           <div v-if="radio.showControls" class="controls">
             <v-btn @click="cambiaRiproduzione(radio)" class="ms-2" variant="text" size="small">
-              <v-icon>{{ radio.playing ? "mdi-stop" : "mdi-play" }}</v-icon>
+              <v-icon :size="40" class="Icon">{{ radio.playing ? "mdi-stop" : "mdi-play" }}</v-icon>
             </v-btn>
             <div @click="cambiaPreferito(radio)" class="heart-container">
               <div :class="['heart', { 'liked': radio.favorite }]"></div>
@@ -59,9 +59,9 @@ export default {
     async getRadios() {
       try {
         this.radios = await this.callAPI();
-        const preferenze = JSON.parse(localStorage.getItem('preferenze')) || [];
+        const preferiti = JSON.parse(localStorage.getItem('preferiti')) || [];
         this.radios.forEach(radio => {
-          const fav = preferenze.find(f => f.changeuuid === radio.changeuuid);
+          const fav = preferiti.find(f => f.changeuuid === radio.changeuuid);
           radio.favorite = fav ? fav.favorite : false;
         });
       } catch (error) {
@@ -119,26 +119,26 @@ export default {
     cambiaPreferito(radio) {
       radio.favorite = !radio.favorite;
       if (!radio.favorite) {
-        let preferenze = JSON.parse(localStorage.getItem('preferenze')) || [];
-        preferenze = this.radios.filter(radio => radio.favorite)
-        console.log(JSON.stringify(preferenze));
-        localStorage.setItem('preferenze', JSON.stringify(preferenze));
+        let preferiti = JSON.parse(localStorage.getItem('preferiti')) || [];
+        preferiti = this.radios.filter(radio => radio.favorite)
+        console.log(JSON.stringify(preferiti));
+        localStorage.setItem('preferiti', JSON.stringify(preferiti));
       } else {
         this.salvaPreferito();
       }
     },
     salvaPreferito() {
-      let preferenze = JSON.parse(localStorage.getItem('preferenze')) || [];
-      preferenze = this.radios.filter(radio => radio.favorite)
-      localStorage.setItem('preferenze', JSON.stringify(preferenze));
-      console.log(localStorage.getItem('preferenze'));
+      let preferiti = JSON.parse(localStorage.getItem('preferiti')) || [];
+      preferiti = this.radios.filter(radio => radio.favorite)
+      localStorage.setItem('preferiti', JSON.stringify(preferiti));
+      console.log(localStorage.getItem('preferiti'));
     },
   },
   created() {
     this.getRadios();
-    const preferenze = JSON.parse(localStorage.getItem('preferenze')) || [];
+    const preferiti = JSON.parse(localStorage.getItem('preferiti')) || [];
     this.radios.forEach(radio => {
-      const fav = preferenze.find(f => f.changeuuid === radio.changeuuid);
+      const fav = preferiti.find(f => f.changeuuid === radio.changeuuid);
       radio.favorite = fav ? fav.favorite : false;
     });
   },
@@ -159,9 +159,9 @@ export default {
   height: 50px;
 }
 
-.d-flex flex-row card {
-  width: 10px;
-  border-radius: 10px;
+.ms-2{
+  margin-bottom: 12px;
+  height:40px;
 }
 
 .heart-container {
@@ -171,9 +171,14 @@ export default {
   margin-top: 100px;
 }
 
+.Icon {
+  width: 40px !important;
+  height: 40px !important;
+}
+
 .heart {
-  width: 20px;
-  height: 18px;
+  width: 40px;
+  height: 40px;
   margin-left: -34px;
   background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="%23C1C1C1"/></svg>') center no-repeat;
   background-size: 100%;
@@ -206,7 +211,7 @@ h1 {
   max-width: 400px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   transition: transform 0.3s;
-  border-radius: 10px;
+  border-radius: 10px !important;
   position: relative;
 }
 
@@ -217,6 +222,7 @@ h1 {
 .card-image {
   width: 100px;
   height: 100px;
+  margin-left: 10px;
   object-fit: cover;
   border-radius: 5px;
   margin-right: 0px;
