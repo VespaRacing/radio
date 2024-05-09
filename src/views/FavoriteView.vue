@@ -2,26 +2,26 @@
   <div><br>
     <h1>Favorite </h1>
     <v-container>
-      <h2>Your Favorite Radios</h2><br>
+      <h1>Radio By Rampi</h1>
       <v-row>
-      <v-col cols="12" sm="6" md="4" lg="3" v-for="radio in favoriteRadios" :key="radio.id">
-        <v-card class="d-flex flex-row card" flat tile @mouseenter="mostraComandi(radio)"
-          @mouseleave="nascondiComandi(radio)">
-          <v-img :src="radio.favicon || defaultImage" class="card-image" :alt="radio.name" />
-          <v-card-title class="flex-grow-1">{{ radio.name }}</v-card-title>
-          <div v-if="radio.mostraComandi" class="controls">
-          <v-btn @click="cambiaRiproduzione(radio)" class="ms-2"  variant="text" size="small">
-            <v-icon>
-              <v-icon>{{ icon }}</v-icon>
-            </v-icon>
-          </v-btn>
-            <div @click="cambiaPreferito(radio)" class="heart-container">
-              <div :class="['heart', { 'liked': radio.favorite }]"></div>
+        <v-col cols="12" sm="6" md="4" lg="3" v-for="radio in radios" :key="radio.id">
+          <v-card class="d-flex flex-row card" flat tile @mouseenter="mostraComandi(radio)"
+            @mouseleave="nascondiComandi(radio)">
+            <v-img :src="radio.favicon || defaultImage" class="card-image" :alt="radio.name" />
+            <v-card-title class="flex-grow-1">{{ radio.name }}</v-card-title>
+            <div v-if="radio.showControls" class="controls">
+              <v-btn @click="cambiaRiproduzione(radio)" class="ms-2" variant="text" size="small">
+                <v-icon>
+                  <v-icon>{{ icon }}</v-icon>
+                </v-icon>
+              </v-btn>
+              <div @click="cambiaPreferito(radio)" class="heart-container">
+                <div :class="['heart', { 'liked': radio.favorite }]"></div>
+              </div>
             </div>
-          </div>
-        </v-card>
-      </v-col>
-    </v-row>
+          </v-card>
+        </v-col>
+      </v-row>
     </v-container>
   </div>
 </template>
@@ -41,8 +41,8 @@ export default {
   },
   methods: {
     async fetchRadios() {
-      let favorites = JSON.parse( localStorage.getItem('favorites'));
-      console.log(JSON.parse( localStorage.getItem('favorites')))
+      let favorites = JSON.parse(localStorage.getItem('favorites'));
+      console.log(JSON.parse(localStorage.getItem('favorites')))
       console.log(favorites);
       return favorites;
     },

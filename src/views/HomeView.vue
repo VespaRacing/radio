@@ -2,22 +2,26 @@
   <v-container>
     <h1>Radio By Rampi</h1>
     <v-row>
-      <v-col cols="12" sm="6" md="4" lg="3" v-for="radio in radios" :key="radio.id">
-        <v-card class="d-flex flex-row card" flat tile @mouseenter="mostraComandi(radio)"
-          @mouseleave="nascondiComandi(radio)">
-          <v-img :src="radio.favicon || defaultImage" class="card-image" :alt="radio.name" />
-          <v-card-title class="flex-grow-1">{{ radio.name }}</v-card-title>
+      <v-col v-for="radio in radios" :key="radio.id" cols="12" sm="6" md="3" lg="3">
+        <v-card class="d-flex flex-row card" max-height="200px" min-height="200px" flat tile
+          @mouseenter="mostraComandi(radio)" @mouseleave="mostraComandi(radio)">
+          <div class="d-flex flex-column">
+            <v-card-title>{{ radio.name }}</v-card-title>
+            <v-img :src="radio.favicon || defaultImage" class="card-image" :alt="radio.name" />
+          </div>
+          <v-spacer></v-spacer>
           <div v-if="radio.showControls" class="controls">
-          <v-btn @click="cambiaRiproduzione(radio)" class="ms-2"  variant="text" size="small">
-            <v-icon>
-              <v-icon>{{ icon }}</v-icon>
-            </v-icon>
-          </v-btn>
+            <v-btn @click="cambiaRiproduzione(radio)" class="ms-2" variant="text" size="small">
+              <v-icon>{{ radio.playing ? "mdi-stop" : "mdi-play" }}</v-icon>
+            </v-btn>
             <div @click="cambiaPreferito(radio)" class="heart-container">
               <div :class="['heart', { 'liked': radio.favorite }]"></div>
             </div>
           </div>
         </v-card>
+
+
+
       </v-col>
     </v-row>
   </v-container>
@@ -47,7 +51,7 @@ export default {
       return data.filter(radio => radio.countrycode === 'IT').map(radio => ({
         ...radio,
         favorite: false,
-        showControls: false,
+        showControls: true,
         playing: false,
         audioPlayer: new Audio(),
       }));
@@ -57,9 +61,9 @@ export default {
         this.radios = await this.callAPI();
         const preferenze = JSON.parse(localStorage.getItem('preferenze')) || [];
         this.radios.forEach(radio => {
-        const fav = preferenze.find(f => f.changeuuid === radio.changeuuid);
-        radio.favorite = fav ? fav.favorite : false;
-      });
+          const fav = preferenze.find(f => f.changeuuid === radio.changeuuid);
+          radio.favorite = fav ? fav.favorite : false;
+        });
       } catch (error) {
         console.error('Errore durante il recupero delle radio:', error);
       }
@@ -72,33 +76,33 @@ export default {
     },
     cambiaRiproduzione(radio) {
       if (radio.playing) {
-        this.fermaSingola(radio);
         this.icon = "mdi-play";
+        this.fermaSingola(radio);
       } else {
         this.icon = "mdi-stop";
         this.interrompiTutto(); // Interrompi tutte le altre radio
         const audioUrl = radio.url_resolved || radio.url;
-      if (audioUrl.includes('m3u8')) {
-        //file m3u8
-        if (Hls.isSupported()) {
-          const hls = new Hls();
-          hls.loadSource(audioUrl);
-          hls.attachMedia(radio.audioPlayer);
-        } else {
-          //mp3
-          console.error('HLS non è supportato in questo browser.');
-        }
-      } else {
-        radio.audioPlayer.src = audioUrl;
-      }
-      radio.audioPlayer.play()
-        .catch(error => {
-          console.error('Errore durante la riproduzione audio:', error);
-          if (error.name === 'NotAllowedError') {
-            console.error('Assicurati che la riproduzione audio sia consentita nelle impostazioni del tuo browser.');
+        if (audioUrl.includes('m3u8')) {
+          //file m3u8
+          if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(audioUrl);
+            hls.attachMedia(radio.audioPlayer);
+          } else {
+            //mp3
+            console.error('HLS non è supportato in questo browser.');
           }
-        });
-      radio.playing = true;
+        } else {
+          radio.audioPlayer.src = audioUrl;
+        }
+        radio.audioPlayer.play()
+          .catch(error => {
+            console.error('Errore durante la riproduzione audio:', error);
+            if (error.name === 'NotAllowedError') {
+              console.error('Assicurati che la riproduzione audio sia consentita nelle impostazioni del tuo browser.');
+            }
+          });
+        radio.playing = true;
       }
     },
     fermaSingola(radio) {
@@ -125,25 +129,24 @@ export default {
     },
     salvaPreferito() {
       let preferenze = JSON.parse(localStorage.getItem('preferenze')) || [];
-        preferenze = this.radios.filter(radio => radio.favorite)
-        localStorage.setItem('preferenze', JSON.stringify(preferenze));
-        console.log(localStorage.getItem('preferenze'));
+      preferenze = this.radios.filter(radio => radio.favorite)
+      localStorage.setItem('preferenze', JSON.stringify(preferenze));
+      console.log(localStorage.getItem('preferenze'));
     },
   },
   created() {
     this.getRadios();
     const preferenze = JSON.parse(localStorage.getItem('preferenze')) || [];
-      this.radios.forEach(radio => {
-        const fav = preferenze.find(f => f.changeuuid === radio.changeuuid);
-        radio.favorite = fav ? fav.favorite : false;
-      });
+    this.radios.forEach(radio => {
+      const fav = preferenze.find(f => f.changeuuid === radio.changeuuid);
+      radio.favorite = fav ? fav.favorite : false;
+    });
   },
 }
 </script>
 
 
 <style scoped>
-
 .v-container {
   background-color: #111111;
   max-width: 12000px;
@@ -151,9 +154,14 @@ export default {
   padding: 20px;
 }
 
-.image{
+.image {
   width: 50px;
-  height:50px;
+  height: 50px;
+}
+
+.d-flex flex-row card {
+  width: 10px;
+  border-radius: 10px;
 }
 
 .heart-container {
@@ -175,7 +183,7 @@ export default {
   background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M16.5 3c-1.74 0-3.41.81-4.5 2.09C10.91 3.81 9.24 3 7.5 3 4.42 3 2 5.42 2 8.5c0 3.78 3.4 6.86 8.55 11.54L12 21.35l1.45-1.32C18.6 15.36 22 12.28 22 8.5 22 5.42 19.58 3 16.5 3z" fill="%23FF0000"/></svg>');
 }
 
-.bnt-play{
+.bnt-play {
   background-color: Green;
   font-size: 40px;
   padding-bottom: 40px;
@@ -198,13 +206,12 @@ h1 {
   max-width: 400px;
   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
   transition: transform 0.3s;
-  border-radius: 5px;
+  border-radius: 10px;
   position: relative;
 }
 
 .card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 1);
 }
 
 .card-image {
@@ -212,12 +219,9 @@ h1 {
   height: 100px;
   object-fit: cover;
   border-radius: 5px;
-  display: none;
+  margin-right: 0px;
 }
 
-.card:hover .card-image {
-  display: block;
-}
 
 .v-card-title {
   color: #333;
