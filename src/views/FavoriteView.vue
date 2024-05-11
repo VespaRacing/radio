@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <h1>Radio By Rampi</h1>
+    <h1 class="titleText">Radio By Rampi</h1>
     <v-row>
       <v-col v-for="radio in preferiti" :key="radio.id" cols="12" sm="6" md="3" lg="3">
         <v-card class="d-flex flex-row card" max-height="200px" min-height="200px" flat tile
@@ -44,7 +44,7 @@ export default {
       stopImage,
     }
   },
-  methods: { 
+  methods: {
     mostraComandi(radio) {
       radio.showControls = true;
     },
@@ -110,17 +110,21 @@ export default {
       localStorage.setItem('preferiti', JSON.stringify(preferiti));
       console.log(localStorage.getItem('preferiti'));
     },
+
+    refresh() {
+      this.preferiti = JSON.parse(localStorage.getItem('preferiti')) || [];
+      console.log(this.preferiti);
+      this.preferiti.forEach(radio => {
+        radio.favorite = true;
+        radio.showControls = true;
+        radio.playing = false;
+        radio.audioPlayer = new Audio();
+      });
+      console.log(this.preferiti);
+    }
   },
   created() {
-    this.preferiti = JSON.parse(localStorage.getItem('preferiti')) || [];
-    this.preferiti.map(radio => ({
-        ...radio,
-        favorite: true,
-        showControls: true,
-        playing: false,
-        audioPlayer: new Audio(),
-      }));
-    console.log(this.preferiti);
+    this.refresh();
   },
 }
 </script>
@@ -139,9 +143,9 @@ export default {
   height: 50px;
 }
 
-.ms-2{
+.ms-2 {
   margin-bottom: 12px;
-  height:40px;
+  height: 40px;
 }
 
 .heart-container {
@@ -154,6 +158,10 @@ export default {
 .Icon {
   width: 40px !important;
   height: 40px !important;
+}
+
+.titleText {
+  color: aliceblue;
 }
 
 .heart {

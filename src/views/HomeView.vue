@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <h1>Radio By Rampi</h1>
+    <h1 class="titleText">Radio By Rampi</h1>
     <v-row>
       <v-col v-for="radio in radios" :key="radio.id" cols="12" sm="6" md="3" lg="3">
         <v-card class="d-flex flex-row card" max-height="200px" min-height="200px" flat tile
@@ -159,6 +159,11 @@ export default {
   height: 50px;
 }
 
+
+.titleText{
+  color: aliceblue;
+}
+
 .ms-2{
   margin-bottom: 12px;
   height:40px;
@@ -242,6 +247,7 @@ h1 {
   /* Changed from 'right' to 'left' */
   display: flex;
   align-items: center;
+  margin-bottom: 50px;
 }
 
 .controls .v-btn {
